@@ -5,12 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "linmath.h"
+#include "shader.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <cstring>
 
 static const struct {
     float x, y;
@@ -36,7 +32,7 @@ int main(int argc, char **argv) {
   GLFWwindow* window;
   GLuint vertex_buffer, vertex_shader, fragment_shader, program;
   GLint mvp_location, vpos_location, vcol_location;
-  const char *vertex_shader_text, *fragment_shader_text;
+  char *vertex_shader_text, *fragment_shader_text;
 
   glfwSetErrorCallback(error_callback);
 
@@ -67,33 +63,24 @@ int main(int argc, char **argv) {
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
   /* Loading Shader Files */
-  std::ifstream vert_f("../shaders/vertex_shader.txt"), frag_f("../shaders/fragment_shader.txt");
-  if (!vert_f || !frag_f) {
+  load_shader_text(&vertex_shader_text, "../shaders/vertex_shader.txt");
+  load_shader_text(&fragment_shader_text, "../shaders/fragment_shader.txt");
+  if (vertex_shader_text == nullptr || fragment_shader_text == nullptr) {
     glfwTerminate();
     error_callback(1, "Failed to load shaders");
     exit(EXIT_FAILURE);
   }
 
-  std::stringstream vertex_shader_ss, fragment_shader_ss;
-  vertex_shader_ss << vert_f.rdbuf();
-  fragment_shader_ss << frag_f.rdbuf();
-  
-  std::string vertex_shader_str, fragment_shader_str;
-  vertex_shader_str = vertex_shader_ss.str();
-  fragment_shader_str = fragment_shader_ss.str();
-  vertex_shader_text = vertex_shader_str.c_str();
-  fragment_shader_text = fragment_shader_str.c_str();
-
-  printf("%s\n", vertex_shader_text);
-  printf("%s\n", fragment_shader_text);
-
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_text, nullptr);
+  free_shader_text(vertex_shader_text);
   glCompileShader(vertex_shader);
-
+  
   fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragment_shader, 1, &fragment_shader_text, nullptr);
+  free_shader_text(fragment_shader_text);
   glCompileShader(fragment_shader);
+
 
   program = glCreateProgram();
   glAttachShader(program, vertex_shader);

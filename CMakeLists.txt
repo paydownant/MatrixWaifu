@@ -31,6 +31,7 @@ find_package(glfw3 REQUIRED)
 
 add_executable(${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/shader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glad/gl.c
 )
 
