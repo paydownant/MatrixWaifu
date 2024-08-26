@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
+
 project(app)
 
 # Set the name of the target operating system
@@ -29,8 +30,10 @@ endif()
 # Find dependencies
 find_package(glfw3 REQUIRED)
 
+
 add_executable(${PROJECT_NAME}
   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/gui.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/shader.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/src/glad/gl.c
 )
