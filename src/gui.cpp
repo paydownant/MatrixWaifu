@@ -1,8 +1,6 @@
+
 #include "gui.h"
-#include "shader.h"
 
-
-#include <math.h>
 
 static void error_callback(int error, const char* description) {
   fprintf(stderr, "Error: %s\n", description);
@@ -15,7 +13,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 
-GUI::GUI() {
+GUI :: GUI() {
 
   glfwSetErrorCallback(error_callback);
 
@@ -27,7 +25,7 @@ GUI::GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   
-  window = glfwCreateWindow(640, 480, "Window", nullptr, nullptr);
+  window = glfwCreateWindow(640, 640, "Window", nullptr, nullptr);
   if (!window) {
     glfwTerminate();
     error_callback(1, "WINDOW CREATION FAIL");
@@ -35,11 +33,12 @@ GUI::GUI() {
   }
 }
 
-GUI::~GUI() {
-
+GUI :: ~GUI() {
+  glfwDestroyWindow(window);
+  glfwTerminate();
 }
 
-void GUI::launch() {
+void GUI :: launch() {
 
   glfwSetKeyCallback(window, key_callback);
   
@@ -47,8 +46,7 @@ void GUI::launch() {
   gladLoadGL(glfwGetProcAddress);
   glfwSwapInterval(1);
 
-  GLuint vertex_buffer, vertex_shader, fragment_shader, shader_program;
-  GLint mvp_location, vpos_location, vcol_location;
+  GLuint vertex_shader, fragment_shader, shader_program;
   char *vertex_shader_text, *fragment_shader_text;
 
   /* Loading Shader Files */
@@ -84,25 +82,16 @@ void GUI::launch() {
   glGenVertexArrays(1, &gl_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
 
-  /* Main Loop */
+  /* Create Vertex Buffer Data */
+  int width, height;
+  createVertexBuffer("../image/1.png", &width, &height);
 
+  /* Main Loop */
   frame_lapsed = 0;
-  var = 1;
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    updateVertexData();
-
-    glBindVertexArray(0);
-
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-
-    // Draw points
-    // glUseProgram(shader_program);
-    glBindVertexArray(gl_buffer);
-    glPointSize(10);
-    glDrawArrays(GL_POINTS, 0, 2);
+    drawVertexBuffer(gl_buffer, width * height);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -110,40 +99,80 @@ void GUI::launch() {
     frame_lapsed += 1;
   }
 
-  glfwDestroyWindow(window);
-  glfwTerminate();
+  
 }
 
-
-void GUI::updateVertexData() {
-
-  float radius = 0.5;
-
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
+void GUI::drawVertexBuffer(GLuint gl_buffer, int vertex_size) {
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_t) * vertex_size, vertices, GL_DYNAMIC_DRAW);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(sizeof(float) * 2));
   glEnableVertexAttribArray(1);
 
+  // updateVertexDataCircle(0.5);
+
+  glBindVertexArray(gl_buffer);
+  // glPointSize(10);
+  glDrawArrays(GL_POINTS, 0, vertex_size);
+}
+
+bool GUI :: createVertexBuffer(const char *file_name, int* width, int* height) {
   
-  if (vertices[0].x > radius) {
+  // image load here
+  ImageSource img(file_name, 1);
+
+  printf("%d x %d\n", img.w, img.h);
+
+  vertices = (vertex_t*)malloc(sizeof(vertex_t) * img.w * img.h);
+  if (vertices == nullptr) {
+    fprintf(stderr, "Failed to allocate memory for %d vertices\n", img.w * img.h);
+    return false;
+  }
+
+  for (u_int i = 0; i < img.w; ++i) {
+    for (u_int j = 0; j < img.h; ++j) {
+      vertices[i * img.w + j].x = (float)i / 256;
+      vertices[i * img.w + j].y = (float)j / 256;
+    }
+  }
+
+  printf("%d x %d\n", img.w, img.h);
+
+
+  *width = img.w;
+  *height = img.h;
+
+  return true;
+}
+
+void GUI :: updateVertexDataCircle(float radius) {
+  
+  if (node_x > radius) {
     var = -1;
     var2 = -1;
-  } else if (vertices[0].x < -radius) {
+  } else if (node_x < -radius) {
     var = 1;
     var2 = 1;
   }
 
   if (var == 1) {
-    vertices[0].x += 0.01f;
+    node_x += 0.01f;
   } else if (var == -1) {
-    vertices[0].x -= 0.01f;
+    node_x -= 0.01f;
   }
 
-  vertices[0].y = var2 * sqrt(radius * radius - vertices[0].x * vertices[0].x);
+  node_y = var2 * sqrt(radius * radius - node_x * node_x);
 
+  vertices[0].x = node_x;
+  vertices[0].y = node_y;
 
-  vertices[1].x = -vertices[0].x;
-  vertices[1].y = -vertices[0].y;
+  vertices[1].x = -node_x;
+  vertices[1].y = -node_y;
+
+  vertices[2].x = -node_y;
+  vertices[2].y = node_x;
+  
+  vertices[3].x = node_y;
+  vertices[3].y = -node_x;
 
 }
