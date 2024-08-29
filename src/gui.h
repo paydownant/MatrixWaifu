@@ -1,12 +1,14 @@
 #ifndef GUI_H
 #define GUI_H
 
+#define GLAD_GL_IMPLEMENTATION
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
 
 #include "shader.h"
 #include "imagesource.h"
+#include "linmath.h"
 
 #include <iostream>
 #include <string>
@@ -18,7 +20,9 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include <math.h>
-
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdio.h>
 
 static void error_callback(int error, const char* description);
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -29,10 +33,10 @@ class GUI {
 private:
   GLFWwindow *window;
 
-  struct vertex_t {
-    float x = 0, y = 0;
-    float r, g, b;
-  };
+  typedef struct vertex {
+    vec2 pos;
+    vec3 col;
+  } vertex_t;
 
   vertex_t *vertices;
 

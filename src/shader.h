@@ -8,7 +8,5 @@
 #include <cstring>
 
 void load_shader_text(char **shader_text, const char *file_path);
-void free_shader_text(char *shader_text);
-
 
 #endif

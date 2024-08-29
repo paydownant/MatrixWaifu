@@ -1,10 +1,10 @@
 #version 330 core
 uniform mat4 MVP;
-layout(location = 0) vec2 aPos;
-layout(location = 1) vec3 aColour;
+in vec2 aPos;
+in vec3 aColour;
 out vec3 colour;
 void main() 
 {
-  gl_Position = vec4(aPos, 0.0, 1.0);
-  color = aColour;
+  gl_Position = MVP* vec4(aPos, 0.0, 1.0);
+  colour = aColour;
 }

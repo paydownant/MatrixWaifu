@@ -1,14 +1,8 @@
 #ifndef IMAGESOURCE_H
 #define IMAGESOURCE_H
 
-#include "stb_image/stb_image.h"
-#include "stb_image/stb_image_write.h"
-
-#include <fstream>
 #include <stdint.h>
 #include <cstdio>
-#include <iostream>
-
 
 enum ImageType {
   INVALID, PNG, JPG, BMP

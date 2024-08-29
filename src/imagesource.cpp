@@ -2,6 +2,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include "imagesource.h"
+#include "stb_image/stb_image.h"
+#include "stb_image/stb_image_write.h"
 
 
 ImageSource::ImageSource(const char* filename, const int channels) : channels(channels) {
@@ -33,7 +35,7 @@ ImageSource::~ImageSource() {
 
 bool ImageSource::read(const char* filename) {
   data = stbi_load(filename, &w, &h, &channels, components);
-  return data != nullptr;
+  return data != NULL;
 }
 
 bool ImageSource::write(const char* filename) {

@@ -1,7 +1,12 @@
 #include "gui.h"
 
-int main(int argc, char **argv) {
-  GUI *gui = new GUI();
+#include "imagesource.h"
 
-  gui->launch();
+int main(int argc, char **argv) {
+  //GUI *gui = new GUI();
+
+  //gui->launch();
+
+
+  ImageSource img("../image/DSC_0498.jpg", 1);
 }
