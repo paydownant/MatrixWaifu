@@ -52,12 +52,7 @@ public:
 
 private:
 
-  void drawVertexBuffer(GLuint gl_buffer, int vertex_size);
-
   bool createVertexBuffer(const char *file_name, int* width, int* height);
-
-
-  void updateVertexDataCircle(float radius);
 
 };
 

@@ -62,7 +62,7 @@ void GUI :: launch() {
   /* Create Vertex Buffer Data */
   int width, height;
   
-  if (!createVertexBuffer("../image/5fd.png", &width, &height)) {
+  if (!createVertexBuffer("../image/anime.png", &width, &height)) {
     error_callback(1, "Failed to create vertex buffer");
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -72,8 +72,7 @@ void GUI :: launch() {
   GLuint gl_buffer;
   glGenBuffers(1, &gl_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, gl_buffer);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_t), vertices, GL_DYNAMIC_DRAW);
-
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_t) * width * height, vertices, GL_STATIC_DRAW);
 
   vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex_shader, 1, &vertex_shader_text, nullptr);
@@ -91,10 +90,12 @@ void GUI :: launch() {
   /* Linked So Delete */
   //glDeleteShader(vertex_shader);
   //glDeleteShader(fragment_shader);
+  free(vertex_shader_text);
+  free(fragment_shader_text);
   
-  const GLint vpos_location = glGetAttribLocation(shader_program, "aPos");
-  const GLint vcol_location = glGetAttribLocation(shader_program, "aColour");
-
+  const GLint mvp_location = glGetUniformLocation(shader_program, "MVP");
+  const GLint vpos_location = glGetAttribLocation(shader_program, "vPos");
+  const GLint vcol_location = glGetAttribLocation(shader_program, "vCol");
 
   GLuint gl_array;
   glGenVertexArrays(1, &gl_array);
@@ -108,16 +109,30 @@ void GUI :: launch() {
   /* Main Loop */
   frame_lapsed = 0;
   while (!glfwWindowShouldClose(window)) {
+    
+    int w, h;
+    mat4x4 m, p, mvp;
+    glfwGetFramebufferSize(window, &w, &h);
+    const float ratio = w / (float) h;
+    mat4x4_identity(m);
+    mat4x4_rotate_Z(m, m, 1 * M_PI);
+    mat4x4_rotate_Y(m, m, 1 * M_PI);
+    mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+    mat4x4_mul(mvp, p, m);
+    
+    
+    glViewport(0, 0, w, h);
+
     glClear(GL_COLOR_BUFFER_BIT);
   
       
     glUseProgram(shader_program);
-
+    glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) &mvp);
     glBindVertexArray(gl_buffer);
     // glPointSize(10);
     glDrawArrays(GL_POINTS, 0, width * height);
 
-    
+
     glfwSwapBuffers(window);
     glfwPollEvents();
 
@@ -130,7 +145,7 @@ void GUI :: launch() {
 bool GUI :: createVertexBuffer(const char *file_name, int* width, int* height) {
   
   // image load here
-  ImageSource img(file_name, 1);
+  Image img(file_name);
 
   printf("%d x %d\n", img.w, img.h);
 
@@ -142,13 +157,22 @@ bool GUI :: createVertexBuffer(const char *file_name, int* width, int* height) {
 
   for (u_int i = 0; i < img.w; ++i) {
     for (u_int j = 0; j < img.h; ++j) {
-      vertices[i * img.w + j].pos[0] = (float)i / 256 - 0.5;
-      vertices[i * img.w + j].pos[1] = (float)j / 256 - 0.5;
+      u_int index = i * img.h + j;
+      vertices[index].pos[0] = (float)i / img.w - 0.5;
+      vertices[index].pos[1] = (float)j / img.h - 0.5;
+
+      u_int dataIndex = j * img.w + i;
+
+      vertices[index].col[0] = (float)img.data[dataIndex] / 256;
+      vertices[index].col[1] = (float)img.data[dataIndex] / 256;
+      vertices[index].col[2] = (float)img.data[dataIndex] / 256;
     }
   }
 
   *width = img.w;
   *height = img.h;
+
+  printf("Vertex Buffer Created!\n");
 
   return true;
 }
