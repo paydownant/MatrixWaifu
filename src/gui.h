@@ -41,7 +41,7 @@ private:
 
   vertex_t *vertices;
 
-  float target_pixel_density = 0.15;
+  float target_pixel_density = 0.1;
   float target_pixel_size = 4.0;
 
   float node_x = 0, node_y = 0;
@@ -53,7 +53,7 @@ public:
   GUI();
   ~GUI();
   void load_image(const char *image_path);
-  void launch();
+  void launch(float pixel_density, float pixel_size);
 
 private:
 

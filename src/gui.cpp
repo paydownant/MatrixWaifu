@@ -42,7 +42,13 @@ void GUI :: load_image(const char *image_path) {
   image_file_path = strdup(image_path);
 }
 
-void GUI :: launch() {
+void GUI :: launch(float pixel_density, float pixel_size) {
+  if (pixel_density) {
+    target_pixel_density = pixel_density;
+  }
+  if (pixel_size) {
+    target_pixel_size = pixel_size;
+  }
 
   glfwSetKeyCallback(window, key_callback);
   
@@ -73,16 +79,16 @@ void GUI :: launch() {
   int window_width = 0, window_height = 0;
   glfwGetFramebufferSize(window, &window_width, &window_height);
 
-  float pixel_density = target_pixel_density, pixel_size;
+  float actual_pixel_density = target_pixel_density, actual_pixel_size;
   u_int target_width = 0, target_height = 0;
   if (window_width >= window_height) {
-    target_width = window_width * pixel_density;
-    target_height = window_width * pixel_density;
+    target_width = window_width * actual_pixel_density;
+    target_height = window_width * actual_pixel_density;
   } else {
-    target_width = window_height * pixel_density;
-    target_height = window_height * pixel_density;
+    target_width = window_height * actual_pixel_density;
+    target_height = window_height * actual_pixel_density;
   }
-  pixel_size = ((float)window_width / 1920) * target_pixel_size;
+  actual_pixel_size = ((float)window_width / 1920) * target_pixel_size;
 
   /* Create Vertex Buffer Data */
   u_int width, height;
@@ -144,6 +150,20 @@ void GUI :: launch() {
     mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
     mat4x4_mul(mvp, p, m);
     
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+      actual_pixel_size += 0.1;
+      printf("Size increased to: %f\n", actual_pixel_size);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+      actual_pixel_size -= 0.1;
+    }
+    if (actual_pixel_size > 10.0) {
+      actual_pixel_size = 10.0;
+    }
+    if (actual_pixel_size < 0.0) {
+      actual_pixel_size = 0.0;
+    }
+
     
     glViewport(0, 0, w, h);
 
@@ -153,7 +173,7 @@ void GUI :: launch() {
     glUseProgram(shader_program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) &mvp);
     glBindVertexArray(gl_buffer);
-    glPointSize(pixel_size);
+    glPointSize(actual_pixel_size);
     glDrawArrays(GL_POINTS, 0, width * height);
 
 
@@ -197,7 +217,6 @@ bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int 
     fprintf(stderr, "Failed to allocate memory for %d vertices\n", target_width * target_height);
     return false;
   }
-  printf("Created %d x %d Buffer\n", target_width, target_height);
 
   for (u_int i = 0; i < target_width; ++i) {
     for (u_int j = 0; j < target_height; ++j) {
@@ -207,7 +226,7 @@ bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int 
 
       u_int dataIndex = (u_int)((float)j / ratio) * img.w + (u_int)((float)i / ratio);
       float bw_level = (float)img.data[dataIndex] / 256;
-      float threshold = 0;
+      float threshold = 0.005;
       if (bw_level > threshold) {
         vertices[index].col[0] = bw_level;
         vertices[index].col[1] = bw_level;
@@ -223,7 +242,7 @@ bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int 
   *actual_width = target_width;
   *actual_height = target_height;
 
-  printf("Vertex Buffer Created!\n");
+  printf("Created %d x %d Buffer\n", target_width, target_height);
 
   return true;
 }
