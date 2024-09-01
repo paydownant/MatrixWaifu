@@ -32,13 +32,17 @@ class GUI {
 
 private:
   GLFWwindow *window;
+  char *image_file_path;
 
   typedef struct vertex {
-    vec2 pos;
-    vec3 col;
+    vec2 pos = { 0, 0 };
+    vec3 col = { 0, 0, 0 };
   } vertex_t;
 
   vertex_t *vertices;
+
+  float target_pixel_density = 0.15;
+  float target_pixel_size = 4.0;
 
   float node_x = 0, node_y = 0;
   int var, var2;
@@ -48,11 +52,12 @@ private:
 public:
   GUI();
   ~GUI();
+  void load_image(const char *image_path);
   void launch();
 
 private:
 
-  bool createVertexBuffer(const char *file_name, int* width, int* height);
+  bool createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height);
 
 };
 

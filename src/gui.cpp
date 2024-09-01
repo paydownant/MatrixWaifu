@@ -25,7 +25,7 @@ GUI :: GUI() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
   
-  window = glfwCreateWindow(640, 640, "Window", nullptr, nullptr);
+  window = glfwCreateWindow(640, 640, "MatrixWaifu", glfwGetPrimaryMonitor(), nullptr);
   if (!window) {
     glfwTerminate();
     error_callback(1, "WINDOW CREATION FAIL");
@@ -36,6 +36,10 @@ GUI :: GUI() {
 GUI :: ~GUI() {
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void GUI :: load_image(const char *image_path) {
+  image_file_path = strdup(image_path);
 }
 
 void GUI :: launch() {
@@ -59,10 +63,30 @@ void GUI :: launch() {
     exit(EXIT_FAILURE);
   }
 
+  if (image_file_path == nullptr) {
+    error_callback(1, "image file path not found\n");
+    glfwDestroyWindow(window);
+    glfwTerminate();
+    exit(EXIT_FAILURE);
+  }
+
+  int window_width = 0, window_height = 0;
+  glfwGetFramebufferSize(window, &window_width, &window_height);
+
+  float pixel_density = target_pixel_density, pixel_size;
+  u_int target_width = 0, target_height = 0;
+  if (window_width >= window_height) {
+    target_width = window_width * pixel_density;
+    target_height = window_width * pixel_density;
+  } else {
+    target_width = window_height * pixel_density;
+    target_height = window_height * pixel_density;
+  }
+  pixel_size = ((float)window_width / 1920) * target_pixel_size;
+
   /* Create Vertex Buffer Data */
-  int width, height;
-  
-  if (!createVertexBuffer("../image/anime.png", &width, &height)) {
+  u_int width, height;
+  if (!createVertexBuffer(&width, &height, target_width, target_height)) {
     error_callback(1, "Failed to create vertex buffer");
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -129,7 +153,7 @@ void GUI :: launch() {
     glUseProgram(shader_program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) &mvp);
     glBindVertexArray(gl_buffer);
-    // glPointSize(10);
+    glPointSize(pixel_size);
     glDrawArrays(GL_POINTS, 0, width * height);
 
 
@@ -142,35 +166,62 @@ void GUI :: launch() {
   
 }
 
-bool GUI :: createVertexBuffer(const char *file_name, int* width, int* height) {
+bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height) {
   
   // image load here
-  Image img(file_name);
+  Image img(image_file_path);
+  free(image_file_path);
 
-  printf("%d x %d\n", img.w, img.h);
+  printf("Loaded %d x %d Image\n", img.w, img.h);
 
-  vertices = (vertex_t*)malloc(sizeof(vertex_t) * img.w * img.h);
+  float ratio = 1.0, aspect_ratio = 1.0;
+  if (img.w >= img.h) {
+    ratio = (float)target_width / img.w;
+  } else {
+    ratio = (float)target_height / img.h;
+  }
+  aspect_ratio = (float)img.h / img.w;
+  target_width = (u_int)(ratio * img.w);
+  target_height = (u_int)(ratio * img.h);
+
+  // Set the target resolutions to correct aspect ratio
+  if (img.w >= img.h) {
+    target_height = (u_int)(aspect_ratio * target_width);
+  } else {
+    target_width = (u_int)(target_height / aspect_ratio);
+  }
+  
+
+  vertices = (vertex_t*)malloc(sizeof(vertex_t) * target_width * target_height);
   if (vertices == nullptr) {
-    fprintf(stderr, "Failed to allocate memory for %d vertices\n", img.w * img.h);
+    fprintf(stderr, "Failed to allocate memory for %d vertices\n", target_width * target_height);
     return false;
   }
+  printf("Created %d x %d Buffer\n", target_width, target_height);
 
-  for (u_int i = 0; i < img.w; ++i) {
-    for (u_int j = 0; j < img.h; ++j) {
-      u_int index = i * img.h + j;
-      vertices[index].pos[0] = (float)i / img.w - 0.5;
-      vertices[index].pos[1] = (float)j / img.h - 0.5;
+  for (u_int i = 0; i < target_width; ++i) {
+    for (u_int j = 0; j < target_height; ++j) {
+      u_int index = j * target_width + i;
+      vertices[index].pos[0] = ((float)i / target_width - 0.5) * 2;
+      vertices[index].pos[1] = ((float)j / target_height - 0.5) * 2;
 
-      u_int dataIndex = j * img.w + i;
-
-      vertices[index].col[0] = (float)img.data[dataIndex] / 256;
-      vertices[index].col[1] = (float)img.data[dataIndex] / 256;
-      vertices[index].col[2] = (float)img.data[dataIndex] / 256;
+      u_int dataIndex = (u_int)((float)j / ratio) * img.w + (u_int)((float)i / ratio);
+      float bw_level = (float)img.data[dataIndex] / 256;
+      float threshold = 0;
+      if (bw_level > threshold) {
+        vertices[index].col[0] = bw_level;
+        vertices[index].col[1] = bw_level;
+        vertices[index].col[2] = bw_level;
+      } else {
+        vertices[index].col[0] = 0;
+        vertices[index].col[1] = 0;
+        vertices[index].col[2] = 0;
+      }
     }
   }
 
-  *width = img.w;
-  *height = img.h;
+  *actual_width = target_width;
+  *actual_height = target_height;
 
   printf("Vertex Buffer Created!\n");
 
