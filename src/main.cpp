@@ -4,6 +4,6 @@
 
 int main(int argc, char **argv) {
   GUI *gui = new GUI();
-  gui->load_image("../image/5fd.png");
-  gui->launch();
+  gui->load_image("../image/satania1.png");
+  gui->launch(0.05, 4.0);
 }
