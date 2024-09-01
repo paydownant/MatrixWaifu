@@ -5,10 +5,6 @@
 #include <math.h>
 #include <string.h>
 
-/* 2021-03-21 Camilla Löwy <elmindreda@elmindreda.org>
- * - Replaced double constants with float equivalents
- */
-
 #ifdef LINMATH_NO_INLINE
 #define LINMATH_H_FUNC static
 #else
@@ -457,12 +453,15 @@ LINMATH_H_FUNC void quat_identity(quat q)
 }
 LINMATH_H_FUNC void quat_mul(quat r, quat const p, quat const q)
 {
-	vec3 w;
-	vec3_mul_cross(r, p, q);
+	vec3 w, tmp;
+
+	vec3_mul_cross(tmp, p, q);
 	vec3_scale(w, p, q[3]);
-	vec3_add(r, r, w);
+	vec3_add(tmp, tmp, w);
 	vec3_scale(w, q, p[3]);
-	vec3_add(r, r, w);
+	vec3_add(tmp, tmp, w);
+
+	vec3_dup(r, tmp);
 	r[3] = p[3]*q[3] - vec3_mul_inner(p, q);
 }
 LINMATH_H_FUNC void quat_conj(quat r, quat const q)
@@ -579,17 +578,17 @@ LINMATH_H_FUNC void mat4x4_arcball(mat4x4 R, mat4x4 const M, vec2 const _a, vec2
 	vec2 a; memcpy(a, _a, sizeof(a));
 	vec2 b; memcpy(b, _b, sizeof(b));
 	
-	float z_a = 0.f;
-	float z_b = 0.f;
+	float z_a = 0.;
+	float z_b = 0.;
 
-	if(vec2_len(a) < 1.f) {
-		z_a = sqrtf(1.f - vec2_mul_inner(a, a));
+	if(vec2_len(a) < 1.) {
+		z_a = sqrtf(1. - vec2_mul_inner(a, a));
 	} else {
 		vec2_norm(a, a);
 	}
 
-	if(vec2_len(b) < 1.f) {
-		z_b = sqrtf(1.f - vec2_mul_inner(b, b));
+	if(vec2_len(b) < 1.) {
+		z_b = sqrtf(1. - vec2_mul_inner(b, b));
 	} else {
 		vec2_norm(b, b);
 	}

@@ -1,0 +1,40 @@
+#ifndef IMAGESOURCE_H
+#define IMAGESOURCE_H
+
+#include <stdint.h>
+#include <cstdio>
+
+enum ImageType {
+    INVALID, PNG, JPG, BMP
+};
+
+enum Channels {
+    R,G,B,Alpha
+};
+
+class Image {
+    public:
+        Image(const char *filename);
+        Image(int w, int h, int channels);
+        Image(const Image &img);
+        ~Image();
+
+        bool read(const char *filename);
+        bool write(const char *filename);
+    
+    private:
+        ImageType getFileType(const char *filename);
+        int channels;
+
+    public:
+        int w;
+        int h;
+        const int components = 1;
+        uint8_t* data = NULL;
+        size_t size = 0;
+        
+    private:
+    
+};
+
+#endif
