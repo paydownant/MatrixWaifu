@@ -152,7 +152,6 @@ void GUI :: launch(float pixel_density, float pixel_size) {
     
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
       actual_pixel_size += 0.1;
-      printf("Size increased to: %f\n", actual_pixel_size);
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
       actual_pixel_size -= 0.1;
@@ -160,8 +159,8 @@ void GUI :: launch(float pixel_density, float pixel_size) {
     if (actual_pixel_size > 10.0) {
       actual_pixel_size = 10.0;
     }
-    if (actual_pixel_size < 0.0) {
-      actual_pixel_size = 0.0;
+    if (actual_pixel_size < 0.1) {
+      actual_pixel_size = 0.1;
     }
 
     
