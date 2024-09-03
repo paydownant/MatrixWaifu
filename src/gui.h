@@ -57,6 +57,7 @@ public:
 
 private:
 
+  bool updateVertexBuffer(u_int* actual_width, u_int* actual_height, u_int current_width, u_int current_height);
   bool createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height);
 
 };

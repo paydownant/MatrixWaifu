@@ -81,6 +81,7 @@ void GUI :: launch(float pixel_density, float pixel_size) {
 
   float actual_pixel_density = target_pixel_density, actual_pixel_size;
   u_int target_width = 0, target_height = 0;
+  
   if (window_width >= window_height) {
     target_width = window_width * actual_pixel_density;
     target_height = window_width * actual_pixel_density;
@@ -163,12 +164,10 @@ void GUI :: launch(float pixel_density, float pixel_size) {
       actual_pixel_size = 0.1;
     }
 
-    
     glViewport(0, 0, w, h);
 
     glClear(GL_COLOR_BUFFER_BIT);
-  
-      
+
     glUseProgram(shader_program);
     glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) &mvp);
     glBindVertexArray(gl_buffer);
@@ -181,8 +180,12 @@ void GUI :: launch(float pixel_density, float pixel_size) {
 
     frame_lapsed += 1;
   }
+}
 
+bool GUI :: updateVertexBuffer(u_int* actual_width, u_int* actual_height, u_int current_width, u_int current_height) {
   
+  
+  return true;
 }
 
 bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height) {
@@ -209,7 +212,6 @@ bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int 
   } else {
     target_width = (u_int)(target_height / aspect_ratio);
   }
-  
 
   vertices = (vertex_t*)malloc(sizeof(vertex_t) * target_width * target_height);
   if (vertices == nullptr) {
