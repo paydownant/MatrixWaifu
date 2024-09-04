@@ -7,11 +7,12 @@
 #include "stb_image/stb_image_write.h"
 
 
-Image :: Image(const char *filename) {
-    if (read(filename)) {
-        printf("Read: %s\n", filename);
+Image :: Image(const std::string filename) {
+    const char *filename_c = filename.c_str();
+    if (read(filename_c)) {
+        printf("Read: %s\n", filename_c);
     } else {
-        printf("Failed to Read: %s\n", filename);
+        printf("Failed to Read: %s\n", filename_c);
     }
     size = w*h*components;
 }

@@ -6,13 +6,6 @@ static void error_callback(int error, const char* description) {
   fprintf(stderr, "Error: %s\n", description);
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-  }
-}
-
-
 GUI :: GUI() {
   /* init glfw */
   glfwSetErrorCallback(error_callback);
@@ -35,12 +28,17 @@ GUI :: GUI() {
 
   glfwMakeContextCurrent(window);
 
+  gladLoadGL(glfwGetProcAddress);
+  glfwSwapInterval(1);
+
   /* load shaders */
+  printf("Creating Vertex Shader...\n");
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
   GLchar *vertex_shader_text = loadShaderText("../shaders/vertex_shader.txt");
   glShaderSource(vertex_shader, 1, &vertex_shader_text, nullptr);
   glCompileShader(vertex_shader);
 
+  printf("Creating Fragment Shader...\n");
   GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
   GLchar *fragment_shader_text = loadShaderText("../shaders/fragment_shader.txt");
   glShaderSource(fragment_shader, 1, &fragment_shader_text, nullptr);
@@ -59,15 +57,80 @@ GUI :: GUI() {
 }
 
 GUI :: ~GUI() {
+  cleanup();
+}
+
+void GUI :: run() {
+  initBuffers();
+
+  while (!glfwWindowShouldClose(window)) {
+    // Process Input
+    processInput();
+
+    // Render
+    glClear(GL_COLOR_BUFFER_BIT);
+    drawPoints();
+
+    // Swap Buffers
+    glfwSwapBuffers(glfwGetCurrentContext());
+    glfwPollEvents();
+  }
+}
+
+
+void GUI :: cleanup() {
+  free(vertices);
+  glDeleteVertexArrays(1, &vertex_array);
+  glDeleteBuffers(1, &vertex_buffer);
+  glDeleteProgram(shader_program);
   glfwDestroyWindow(window);
   glfwTerminate();
 }
 
-bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height) {
+void GUI :: initBuffers() {
+  image_file_path = "../image/satania1.png";
+
+  u_int target_width = 255, target_height = 255;
+  if (!createVertexBuffer(target_width, target_height)) {
+    error_callback(1, "Failed to generate vertex buffer");
+    cleanup();
+    exit(1);
+  }
+
+  glGenVertexArrays(1, &vertex_array);
+  glGenBuffers(1, &vertex_buffer);
+
+  glBindVertexArray(vertex_array);
+
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_t) * width * height, vertices, GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (void*)(2 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+}
+
+void GUI :: drawPoints() {
+  glUseProgram(shader_program);
+  glBindVertexArray(vertex_array);
+  glDrawArrays(GL_POINTS, 0, width * height);
+  glBindVertexArray(0);
+}
+
+void GUI :: processInput() {
+  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+}
+
+bool GUI :: createVertexBuffer(u_int target_width, u_int target_height) {
   
   // image load here
   Image img(image_file_path);
-  free(image_file_path);
 
   printf("Loaded %d x %d Image\n", img.w, img.h);
 
@@ -115,8 +178,8 @@ bool GUI :: createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int 
     }
   }
 
-  *actual_width = target_width;
-  *actual_height = target_height;
+  width = target_width;
+  height = target_height;
 
   printf("Created %d x %d Buffer\n", target_width, target_height);
 

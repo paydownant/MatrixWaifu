@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <cstdio>
+#include <string>
+#include <cstring>
 
 enum ImageType {
     INVALID, PNG, JPG, BMP
@@ -14,7 +16,7 @@ enum Channels {
 
 class Image {
     public:
-        Image(const char *filename);
+        Image(const std::string filename);
         Image(int w, int h, int channels);
         Image(const Image &img);
         ~Image();

@@ -4,7 +4,7 @@ char* loadShaderText(const char *file_path) {
 
   FILE *ifp = fopen(file_path, "r");
   if (ifp == nullptr) {
-    return;
+    return nullptr;
   }
 
   fseek(ifp, 0, SEEK_END);

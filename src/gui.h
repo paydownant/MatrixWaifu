@@ -26,17 +26,19 @@
 #include <stdio.h>
 
 static void error_callback(int error, const char* description);
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 
 class GUI {
 
 private:
   GLFWwindow *window;
+  
+  GLuint vertex_array;      // Vertex Array Object
+  GLuint vertex_buffer;     // Vertex Buffer Object
+  GLuint shader_program;    // Shader Program
 
-  GLuint shader_program;
+  GLuint width, height;
 
-  char *image_file_path;
+  std::string image_file_path;
 
   typedef struct vertex {
     vec2 pos = { 0, 0 };
@@ -56,10 +58,15 @@ private:
 public:
   GUI();
   ~GUI();
+  void run();
+  void cleanup();
 
 private:
-
-  bool createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height);
+  
+  void initBuffers();
+  void drawPoints();
+  void processInput();
+  bool createVertexBuffer(u_int target_width, u_int target_height);
 
 };
 
