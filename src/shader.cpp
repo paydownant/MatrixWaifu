@@ -1,6 +1,6 @@
 #include "shader.h"
 
-void load_shader_text(char **shader_text, const char *file_path) {
+char* loadShaderText(const char *file_path) {
 
   FILE *ifp = fopen(file_path, "r");
   if (ifp == nullptr) {
@@ -17,8 +17,9 @@ void load_shader_text(char **shader_text, const char *file_path) {
   char buffer[256];
   fread(&buffer, size, sizeof(char), ifp);
 
-  *shader_text = strndup(buffer, size);
-
+  char *shader = strndup(buffer, size);
 
   fclose(ifp);
+
+  return shader;
 }

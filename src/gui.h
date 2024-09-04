@@ -5,6 +5,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include <glm/glm.hpp>
 
 #include "shader.h"
 #include "imagesource.h"
@@ -32,6 +33,9 @@ class GUI {
 
 private:
   GLFWwindow *window;
+
+  GLuint shader_program;
+
   char *image_file_path;
 
   typedef struct vertex {
@@ -52,12 +56,9 @@ private:
 public:
   GUI();
   ~GUI();
-  void load_image(const char *image_path);
-  void launch(float pixel_density, float pixel_size);
 
 private:
 
-  bool updateVertexBuffer(u_int* actual_width, u_int* actual_height, u_int current_width, u_int current_height);
   bool createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height);
 
 };
