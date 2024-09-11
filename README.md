@@ -7,5 +7,5 @@ Build dir is included just for the sake of example. In applications, build dir n
 Cmake works for only for linux at this time since some dependencies fails to connect on mingw environment in linux.
 
 Dependencies: For opengl & opengl example
-  - glfw3 (apt install libglfw3 and libglfw3-dev)
-  - xorg (apt install xorg-dev)
+  - glfw3 (pacman -S glfw)
+  - xorg (pacman -S install xorg)
