@@ -157,13 +157,13 @@ bool GUI :: createVertexBuffer(u_int target_width, u_int target_height) {
     return false;
   }
 
-  for (u_int i = 0; i < target_width; ++i) {
-    for (u_int j = 0; j < target_height; ++j) {
-      u_int index = j * target_width + i;
+  for (u_int i = 0; i < target_height; ++i) {
+    for (u_int j = 0; j < target_width; ++j) {
+      u_int index = i * target_width + j;
       vertices[index].pos[0] = ((float)i / target_width - 0.5) * 2;
       vertices[index].pos[1] = ((float)j / target_height - 0.5) * 2;
 
-      u_int dataIndex = (u_int)((float)j / ratio) * img.w + (u_int)((float)i / ratio);
+      u_int dataIndex = (u_int)((float)i / ratio) * img.w + (u_int)((float)j / ratio);
       float bw_level = (float)img.data[dataIndex] / 256;
       float threshold = 0.005;
       if (bw_level > threshold) {
