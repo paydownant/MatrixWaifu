@@ -5,6 +5,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/gl.h>
+#include <glm/glm.hpp>
 
 #include "shader.h"
 #include "imagesource.h"
@@ -25,14 +26,19 @@
 #include <stdio.h>
 
 static void error_callback(int error, const char* description);
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 
 class GUI {
 
 private:
   GLFWwindow *window;
-  char *image_file_path;
+  
+  GLuint vertex_array;      // Vertex Array Object
+  GLuint vertex_buffer;     // Vertex Buffer Object
+  GLuint shader_program;    // Shader Program
+
+  GLuint width, height;
+
+  std::string image_file_path;
 
   typedef struct vertex {
     vec2 pos = { 0, 0 };
@@ -52,13 +58,15 @@ private:
 public:
   GUI();
   ~GUI();
-  void load_image(const char *image_path);
-  void launch(float pixel_density, float pixel_size);
+  void run();
+  void cleanup();
 
 private:
-
-  bool updateVertexBuffer(u_int* actual_width, u_int* actual_height, u_int current_width, u_int current_height);
-  bool createVertexBuffer(u_int* actual_width, u_int* actual_height, u_int target_width, u_int target_height);
+  
+  void initBuffers();
+  void drawPoints();
+  void processInput();
+  bool createVertexBuffer(u_int target_width, u_int target_height);
 
 };
 

@@ -7,6 +7,6 @@
 #include <string>
 #include <cstring>
 
-void load_shader_text(char **shader_text, const char *file_path);
+char* loadShaderText(const char *file_path);
 
 #endif

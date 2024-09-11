@@ -1,7 +1,7 @@
-#version 330 core
-in vec3 color;
-out vec4 fragment;
-void main()
-{
-  fragment = vec4(color, 1.0);
+#version 450 core
+in vec3 fragColour;
+out vec4 colour;
+
+void main() {
+  colour = vec4(fragColour, 1.0);
 }
