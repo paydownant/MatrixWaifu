@@ -56,7 +56,7 @@ private:
 
 
 public:
-  GUI();
+  GUI(const char *file_path);
   ~GUI();
   void run();
   void cleanup();

@@ -6,7 +6,10 @@ static void error_callback(int error, const char* description) {
   fprintf(stderr, "Error: %s\n", description);
 }
 
-GUI :: GUI() {
+GUI :: GUI(const char *file_path) {
+
+  image_file_path = file_path;
+
   /* init glfw */
   glfwSetErrorCallback(error_callback);
 
@@ -88,7 +91,6 @@ void GUI :: cleanup() {
 }
 
 void GUI :: initBuffers() {
-  image_file_path = "../image/satania1.png";
 
   u_int target_width = 255, target_height = 255;
   if (!createVertexBuffer(target_width, target_height)) {
