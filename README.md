@@ -4,7 +4,7 @@ Build dir is included just for the sake of being an example. In applications, bu
   - cmake . -B <build_dir_path>
   - or enter build dir and cmake ..
 
-Cmake works for only for linux at this time since some dependencies fails to connect on mingw environment in linux.
+Cmake works only for linux at this time since some dependencies fails to connect on mingw environment in linux.
 
 Dependencies: For opengl & opengl example
   - glfw3 (pacman -S glfw)
